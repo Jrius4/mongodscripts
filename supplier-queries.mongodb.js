@@ -348,6 +348,61 @@ try {
     console.log("=================[end->perform aggregation on supplier and get agents]======================");
 
 
+    // perform aggregation on supplier and get agents with (agentandsupplier status pending )
+    console.log("=================[start->perform aggregation on supplier and get agents with (agentandsupplier status pending )]======================");
+
+    const pageAgencyStatus = 1; // Current page number
+    const pageSizeAgencyStatus = 10; // Number of documents per page
+
+    const pipelineAgencyStatus = [
+        {
+            $lookup: {
+                from: "agentandsupplier",
+                localField: "_id",
+                foreignField: "supplierAgent",
+                as: "agentDetails"
+            }
+        },
+        {
+            $unwind: "$agentDetails"
+        },
+        {
+            $match: {
+                "agentDetails.status": "pending"
+            }
+        },
+        {
+            $facet: {
+                data: [
+                    { $skip: (pageAgencyStatus - 1) * pageSizeAgencyStatus },
+                    { $limit: pageSizeAgencyStatus },
+                    {
+                        $project: {
+                            _id: 1,
+                            supplierName: 1,
+                            "agentDetails.agentId": 1,
+                            "agentDetails.status": 1
+                        }
+                    }
+                ],
+                totalCount: [
+                    { $count: "count" }
+                ]
+            }
+        }
+    ];
+
+    const resultAgencyStatus = db.getCollection("suppliers").aggregate(pipelineAgencyStatus).toArray();
+    const suppliersAgencyStatus = resultAgencyStatus[0].data;
+    const totalCountAgencyStatus = resultAgencyStatus[0].totalCount[0] ? resultAgencyStatus[0].totalCount[0].count : 0;
+    const hasNextPageAgencyStatus = (pageAgencyStatus * pageSizeAgencyStatus) < totalCountAgencyStatus;
+
+    printjson({ suppliersAgencyStatus, hasNextPageAgencyStatus });
+
+    console.log("=================[start->perform aggregation on supplier and get agents with (agentandsupplier status pending )]======================");
+
+
+
 } catch (e) {
     console.error(e)
     console.error('Error in supplier-queries.mongodb.js')
