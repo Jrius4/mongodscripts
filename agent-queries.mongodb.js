@@ -20,6 +20,8 @@ try {
     /**
      * Aggregation pipeline to fetch supplier agents and their relationships
      */
+
+    console.log("=========================[start->Aggregation pipeline to fetch supplier agents and their relationships]===================================");
     const pipeline = [
         { $match: { isSupplierAgent: true } },
         {
@@ -73,7 +75,11 @@ try {
 
     printjson({ result, hasNextPage });
 
+    console.log("=========================[end->Aggregation pipeline to fetch supplier agents and their relationships]===================================");
+
     // Query suppliers with a specific agent status
+    console.log("=========================[end->Query suppliers with a specific agent status]===================================");
+
     const agentStatusPipeline = [
         {
             $lookup: {
@@ -99,7 +105,7 @@ try {
     const hasNextPageAgencyStatus = (page * pageSize) < totalCountAgencyStatus;
 
     printjson({ suppliersAgencyStatus, hasNextPageAgencyStatus, totalCountAgencyStatus });
-
+    console.log("=========================[end->Query suppliers with a specific agent status]===================================");
 } catch (e) {
     console.error('Error executing query:', e);
 }
